@@ -1,7 +1,7 @@
 services:
   kanso-web:
     build: .
-    image: kanso-web:latest
+    image: kanso-web:1.0.0
     container_name: kanso-web
     ports:
       - "${KANSO_PORT:-8088}:80"
