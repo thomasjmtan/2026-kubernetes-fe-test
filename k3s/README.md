@@ -48,7 +48,7 @@ export KANSO_KUBECONFIG="$PWD/.secrets/deployer.kubeconfig"
 ```
 
 With `KANSO_KUBECONFIG` set, the scripts run host `kubectl` with that file instead of
-`docker exec k3s kubectl`. `make-deployer-kubeconfig.sh` needs admin, so run it
+`docker exec k3s kubectl`. So `kubectl` must be installed on the host (Docker is still needed to build). `make-deployer-kubeconfig.sh` needs admin, so run it
 without `KANSO_KUBECONFIG`. The deployer kubeconfig is a secret. Do not commit or share it.
 Unset `KANSO_KUBECONFIG` before running `setup.sh` again.
 
@@ -76,5 +76,6 @@ docker compose down         # stop; cluster state is kept in the k3s-data volume
 docker compose down -v      # stop and wipe the cluster
 ```
 
-`.secrets/` stays on disk after `down -v`. Delete it too for a clean start,
-or the old staging password file will not match the new cluster.
+`.secrets/` stays on disk after `down -v`. `.secrets/deployer.kubeconfig` then
+belongs to the old cluster. After the next `./setup.sh`, run
+`./make-deployer-kubeconfig.sh` again. (`setup.sh` writes a new staging password file.)
