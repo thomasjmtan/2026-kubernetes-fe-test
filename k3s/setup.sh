@@ -36,6 +36,9 @@ for env in staging prod; do
     | kc apply -f -
 done
 
+echo "==> Applying deployer account"
+kc apply -f /manifests/deployer.yaml
+
 echo "==> Removing old kanso namespace"
 kc delete namespace kanso --ignore-not-found
 
