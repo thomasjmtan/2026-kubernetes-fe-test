@@ -1,26 +1,25 @@
 #!/usr/bin/env bash
-# Build the frontend image, load it into k3s, and roll the Deployment to it.
-# Usage: ./deploy.sh [tag]   (default tag: 1.0.0)
+# Build the frontend image, load it into k3s, and roll STAGING to it.
+# Usage: ./deploy.sh <tag>
 set -euo pipefail
+. "$(dirname "$0")/lib.sh"
 
-TAG="${1:-1.0.0}"
+if [ $# -lt 1 ] || [ -z "$1" ]; then
+  echo "Usage: $(basename "$0") <tag>" >&2
+  exit 2
+fi
+TAG="$1"
 IMAGE="kanso-web:${TAG}"
-HERE="$(cd "$(dirname "$0")" && pwd)"
-# MSYS_NO_PATHCONV: stop Git Bash on Windows rewriting container paths like /manifests
-kc() { MSYS_NO_PATHCONV=1 docker exec k3s kubectl "$@"; }
+NS="$(env_ns staging)"
 
-echo "==> Building ${IMAGE}"
-docker build -t "${IMAGE}" "${HERE}/../frontend"
-
-echo "==> Importing ${IMAGE} into k3s"
-docker save "${IMAGE}" | docker exec -i k3s ctr images import -
-
-if ! kc -n kanso get deploy/kanso-web >/dev/null 2>&1; then
-  echo "==> First deploy: applying manifests"
-  kc apply -f /manifests/
+if [ "$(current_image "${NS}")" = "${IMAGE}" ]; then
+  echo "staging already runs ${IMAGE}; nothing to do"
+  exit 0
 fi
 
-echo "==> Rolling kanso-web to ${IMAGE}"
-kc -n kanso set image deploy/kanso-web web="${IMAGE}"
-kc -n kanso annotate deploy/kanso-web kubernetes.io/change-cause="deploy ${IMAGE}" --overwrite
-kc -n kanso rollout status deploy/kanso-web --timeout=120s
+import_image "${TAG}"
+
+echo "==> Rolling staging to ${IMAGE}"
+kc -n "${NS}" set image deploy/kanso-web web="${IMAGE}"
+kc -n "${NS}" annotate deploy/kanso-web kubernetes.io/change-cause="deploy ${IMAGE}" --overwrite
+kc -n "${NS}" rollout status deploy/kanso-web --timeout=120s
