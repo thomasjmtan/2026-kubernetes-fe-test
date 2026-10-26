@@ -4,6 +4,7 @@ namespace: kanso-staging
 resources:
   - ../base
   - namespace.yaml
+  - middleware.yaml
 replicas:
   - name: kanso-web
     count: 1
@@ -15,3 +16,13 @@ patches:
       - op: replace
         path: /spec/rules/0/host
         value: staging.kanso.localhost
+  - target:
+      kind: Ingress
+      name: kanso-web
+    patch: |-
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: kanso-web
+        annotations:
+          traefik.ingress.kubernetes.io/router.middlewares: kanso-staging-staging-auth@kubernetescrd

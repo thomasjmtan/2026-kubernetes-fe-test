@@ -12,6 +12,18 @@ fi
 echo "==> Applying headlamp"
 kc apply -f /manifests/headlamp.yaml
 
+# Staging password: the Secret must exist before the staging Ingress is applied.
+# Never overwritten; the plain password is kept in git-ignored k3s/.secrets/.
+kc create namespace kanso-staging --dry-run=client -o yaml | kc apply -f - >/dev/null
+if ! kc -n kanso-staging get secret staging-auth >/dev/null 2>&1; then
+  password="${STAGING_PASSWORD:-$(openssl rand -hex 8)}"
+  mkdir -p "${HERE}/.secrets"
+  printf '%s\n' "${password}" > "${HERE}/.secrets/staging-password.txt"
+  echo "==> Creating staging-auth secret (user staging, password in k3s/.secrets/staging-password.txt)"
+  printf 'staging:%s\n' "$(openssl passwd -apr1 "${password}")" \
+    | kc -n kanso-staging create secret generic staging-auth --from-file=users=/dev/stdin
+fi
+
 for env in staging prod; do
   ns="$(env_ns "${env}")"
   image="kanso-web:1.0.0"
