@@ -43,6 +43,13 @@
     updated.textContent = s < 2 ? "just now" : s + "s ago";
   }, 1000);
 
+  // Version: written at build time to /version.txt.
+  const version = document.getElementById("version");
+  fetch("/version.txt", { cache: "no-store" })
+    .then((r) => { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then((t) => { version.textContent = t.trim() || "dev"; })
+    .catch(() => { version.textContent = "dev"; });
+
   // Access form: client-side only.
   const form = document.querySelector(".join-form");
   const msg = document.querySelector(".form-msg");

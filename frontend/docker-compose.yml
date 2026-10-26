@@ -1,6 +1,9 @@
 services:
   kanso-web:
-    build: .
+    build:
+      context: .
+      args:
+        VERSION: ${KANSO_VERSION:-dev}
     image: kanso-web:1.0.0
     container_name: kanso-web
     ports:
