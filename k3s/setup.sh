@@ -3,6 +3,7 @@
 # Safe to re-run: never changes the image a running environment uses.
 # Usage: ./setup.sh
 set -euo pipefail
+unset KANSO_KUBECONFIG   # setup always needs admin
 . "$(dirname "$0")/lib.sh"
 
 if ! docker exec k3s ctr images ls -q | grep -q 'kanso-web:1.0.0$'; then

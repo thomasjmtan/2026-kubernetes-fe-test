@@ -4,7 +4,7 @@ services:
       context: .
       args:
         VERSION: ${KANSO_VERSION:-dev}
-    image: kanso-web:1.0.0
+    image: kanso-web:dev
     container_name: kanso-web
     ports:
       - "${KANSO_PORT:-8088}:80"

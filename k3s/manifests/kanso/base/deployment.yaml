@@ -5,6 +5,7 @@ metadata:
 spec:
   replicas: 2
   revisionHistoryLimit: 5
+  minReadySeconds: 3
   selector:
     matchLabels:
       app: kanso-web
@@ -22,6 +23,10 @@ spec:
         - name: web
           image: kanso-web:1.0.0          # imported into k3s by deploy.sh, not pulled
           imagePullPolicy: IfNotPresent
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 5          # keep serving while Traefik drops this endpoint
           ports:
             - containerPort: 80
           readinessProbe:

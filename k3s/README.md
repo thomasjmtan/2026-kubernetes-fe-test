@@ -21,7 +21,7 @@ docker compose up -d        # start the cluster (first start takes ~1 min)
 ./setup.sh                  # headlamp, staging, prod, deployer account
 ```
 
-`setup.sh` uses admin access, so run it without `KANSO_KUBECONFIG`.
+`setup.sh` always uses admin access (it ignores `KANSO_KUBECONFIG`).
 It is safe to re-run. It never changes the image an environment already runs.
 To choose the staging password, run `STAGING_PASSWORD=... ./setup.sh` the first time.
 
@@ -34,7 +34,9 @@ To choose the staging password, run `STAGING_PASSWORD=... ./setup.sh` the first 
 ./rollback.sh prod
 ```
 
-Each deploy needs a new tag. Deploying the tag staging already runs does nothing.
+Each code change needs a new tag. If `kanso-web:<tag>` already exists in k3s, deploy
+reuses it and does not rebuild, so an old tag never picks up new code.
+Deploying the tag staging already runs does nothing.
 
 ## Deployer account (limited access)
 
@@ -50,7 +52,8 @@ export KANSO_KUBECONFIG="$PWD/.secrets/deployer.kubeconfig"
 With `KANSO_KUBECONFIG` set, the scripts run host `kubectl` with that file instead of
 `docker exec k3s kubectl`. So `kubectl` must be installed on the host (Docker is still needed to build). `make-deployer-kubeconfig.sh` needs admin, so run it
 without `KANSO_KUBECONFIG`. The deployer kubeconfig is a secret. Do not commit or share it.
-Unset `KANSO_KUBECONFIG` before running `setup.sh` again.
+
+The token never expires. To rotate it: delete Secret `ci/deployer-token`, run `./setup.sh`, then `./make-deployer-kubeconfig.sh`.
 
 ## Headlamp login token
 

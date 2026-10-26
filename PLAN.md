@@ -16,8 +16,12 @@ see the workflow as a picture.
 **Where we are today**
 
 - k3s runs in one Docker container (`k3s/docker-compose.yml`).
-- Kanso runs in one namespace called `kanso`, at http://kanso.localhost:8081.
-- `k3s/deploy.sh` builds the image, loads it into k3s and updates the site.
+- Kanso runs in two namespaces: `kanso-prod` (http://kanso.localhost:8081, 2 replicas) and
+  `kanso-staging` (http://staging.kanso.localhost:8081, 1 replica, basic auth with a
+  generated password in `k3s/.secrets/`).
+- `k3s/setup.sh` sets up everything. `deploy.sh` builds an image and rolls staging,
+  `promote.sh` puts staging's exact image on prod, `rollback.sh` undoes the last change.
+- A restricted `deployer` account (patch Deployments only) is ready for the pipeline.
 - Rolling update and rollback have been tested.
 
 ---
@@ -36,7 +40,7 @@ Everything stays on this machine. No GitHub yet.
    - `kanso-prod` at http://kanso.localhost:8081
    - `kanso-staging` at http://staging.kanso.localhost:8081
 3. **One set of files, two small differences.** The shared setup lives in
-   `k3s/manifests/base/`. Staging and production each get a short file that only
+   `k3s/manifests/kanso/base/`. Staging and production each get a short file that only
    says what is different (name, web address, number of copies). kubectl can join
    them by itself (`kubectl apply -k`), so we need no extra tools.
 4. **Three simple scripts:**

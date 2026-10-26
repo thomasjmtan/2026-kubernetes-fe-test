@@ -17,7 +17,11 @@ if [ "$(current_image "${NS}")" = "${IMAGE}" ]; then
   exit 0
 fi
 
-import_image "${TAG}"
+if docker exec k3s ctr images ls -q | grep -x "docker.io/library/kanso-web:${TAG}" >/dev/null; then
+  echo "==> ${IMAGE} already in k3s, reusing it (not rebuilding)"
+else
+  import_image "${TAG}"
+fi
 
 echo "==> Rolling staging to ${IMAGE}"
 kc -n "${NS}" set image deploy/kanso-web web="${IMAGE}"

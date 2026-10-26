@@ -6,6 +6,8 @@ set -euo pipefail
 
 STAGING="$(env_ns staging)"
 PROD="$(env_ns prod)"
+echo "==> Checking staging is healthy"
+kc -n "${STAGING}" rollout status deploy/kanso-web --timeout=10s
 IMAGE="$(current_image "${STAGING}")"
 
 if [ "$(current_image "${PROD}")" = "${IMAGE}" ]; then
