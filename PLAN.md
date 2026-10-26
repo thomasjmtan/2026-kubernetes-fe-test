@@ -24,6 +24,8 @@ see the workflow as a picture.
 
 ## Phase 1: Staging and production side by side
 
+Status: done.
+
 Everything stays on this machine. No GitHub yet.
 
 **What we build**
@@ -75,6 +77,8 @@ shared place to put images, called a registry.
 ---
 
 ## Phase 3: A limited account for the pipeline
+
+Status: done.
 
 The Headlamp login can do anything in the cluster. The pipeline must not have that
 much power.
