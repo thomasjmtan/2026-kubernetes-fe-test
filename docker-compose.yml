@@ -1,0 +1,13 @@
+services:
+  kanso-web:
+    build: .
+    image: kanso-web:latest
+    container_name: kanso-web
+    ports:
+      - "${KANSO_PORT:-8088}:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
