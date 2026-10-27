@@ -20,8 +20,8 @@ jobs:
       url: http://kanso.localhost:8081
     defaults:
       run:
-        # Git Bash explicitly: plain `bash` on this PC is WSL
-        shell: '"C:\Program Files\Git\bin\bash.exe" --noprofile --norc -eo pipefail {0}'
+        # Git Bash explicitly (plain `bash` here is WSL). 8.3 short path: the runner cannot parse a quoted path with spaces
+        shell: C:\PROGRA~1\Git\bin\bash.exe --noprofile --norc -eo pipefail {0}
     steps:
       - uses: actions/checkout@v4
 

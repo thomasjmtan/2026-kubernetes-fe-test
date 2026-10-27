@@ -278,6 +278,54 @@ ol, ul { list-style: none; margin: 0; padding: 0; }
   color: var(--shu); opacity: .12;
 }
 
+/* Dashboard cube */
+.cube-stage { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.cube-scene {
+  --size: min(200px, 48vw);
+  --half: calc(var(--size) / 2);
+  position: relative;
+  display: grid; place-items: center;
+  width: calc(var(--size) * 1.7); height: calc(var(--size) * 1.7);
+  perspective: 1000px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.cube {
+  position: relative;
+  width: var(--size); height: var(--size);
+  transform-style: preserve-3d;
+  transition: transform .6s cubic-bezier(.2, .7, .2, 1);
+}
+.face {
+  position: absolute; inset: 0;
+  border: 1px solid var(--ink);
+  background: color-mix(in srgb, var(--ink) var(--shade), var(--paper));
+}
+/* Faces stay blank; slightly different tones make each turn readable. */
+.face.front  { --shade: 0%;  transform: translateZ(var(--half)); }
+.face.back   { --shade: 10%; transform: rotateY(180deg) translateZ(var(--half)); }
+.face.right  { --shade: 6%;  transform: rotateY(90deg) translateZ(var(--half)); }
+.face.left   { --shade: 14%; transform: rotateY(-90deg) translateZ(var(--half)); }
+.face.top    { --shade: 3%;  transform: rotateX(90deg) translateZ(var(--half)); }
+.face.bottom { --shade: 18%; transform: rotateX(-90deg) translateZ(var(--half)); }
+
+/* A thin vermilion line marks the edge a click will turn towards. */
+.cube-hint {
+  position: absolute; background: var(--shu);
+  opacity: 0; transition: opacity .2s;
+}
+.cube-hint[data-dir="up"], .cube-hint[data-dir="down"] { left: 35%; right: 35%; height: 2px; }
+.cube-hint[data-dir="left"], .cube-hint[data-dir="right"] { top: 35%; bottom: 35%; width: 2px; }
+.cube-hint[data-dir="up"] { top: 0; }
+.cube-hint[data-dir="down"] { bottom: 0; }
+.cube-hint[data-dir="left"] { left: 0; }
+.cube-hint[data-dir="right"] { right: 0; }
+.cube-scene[data-hover="up"] .cube-hint[data-dir="up"],
+.cube-scene[data-hover="down"] .cube-hint[data-dir="down"],
+.cube-scene[data-hover="left"] .cube-hint[data-dir="left"],
+.cube-scene[data-hover="right"] .cube-hint[data-dir="right"] { opacity: 1; }
+.cube-note { color: var(--ink-soft); text-align: center; }
+
 /* Footer */
 .footer {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
