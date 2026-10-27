@@ -1,0 +1,36 @@
+# Manual button: roll staging or production back to its previous version.
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to roll back
+        type: choice
+        options: [staging, prod]
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    runs-on: [self-hosted, k3s-local]
+    environment: ${{ inputs.environment == 'prod' && 'production' || 'staging' }}
+    defaults:
+      run:
+        # Git Bash explicitly: plain `bash` on this PC is WSL
+        shell: '"C:\Program Files\Git\bin\bash.exe" --noprofile --norc -eo pipefail {0}'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Roll back ${{ inputs.environment }}
+        env:
+          DEPLOYER_KUBECONFIG: ${{ secrets.DEPLOYER_KUBECONFIG }}
+        run: |
+          export KANSO_KUBECONFIG="${RUNNER_TEMP}/deployer.kubeconfig"
+          printf '%s' "${DEPLOYER_KUBECONFIG}" > "${KANSO_KUBECONFIG}"
+          k3s/rollback.sh "${{ inputs.environment }}"
+
+      - name: Clean up
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/deployer.kubeconfig"

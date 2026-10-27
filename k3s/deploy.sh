@@ -24,6 +24,4 @@ else
 fi
 
 echo "==> Rolling staging to ${IMAGE}"
-kc -n "${NS}" set image deploy/kanso-web web="${IMAGE}"
-kc -n "${NS}" annotate deploy/kanso-web kubernetes.io/change-cause="deploy ${IMAGE}" --overwrite
-kc -n "${NS}" rollout status deploy/kanso-web --timeout=120s
+roll "${NS}" "${IMAGE}" "deploy ${IMAGE}"

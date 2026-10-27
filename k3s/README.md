@@ -55,6 +55,24 @@ without `KANSO_KUBECONFIG`. The deployer kubeconfig is a secret. Do not commit o
 
 The token never expires. To rotate it: delete Secret `ci/deployer-token`, run `./setup.sh`, then `./make-deployer-kubeconfig.sh`.
 
+## GitHub pipeline (two branches)
+
+Workflows in `.github/workflows/` run on the self-hosted runner on this PC (label `k3s-local`).
+
+| Event | Workflow | What happens |
+|---|---|---|
+| Push to `staging` | Staging | Build `ghcr.io/thomasjmtan/kanso-web:<hash>` (skipped if it exists), deploy it to staging |
+| Push or merge to `main` | Production | Promote that same image to prod, only if staging runs it. No rebuild |
+| Manual (Actions tab) | Rollback | Roll staging or prod back one version |
+
+The image tag is git's hash of the `frontend/` folder, not the commit. Any merge style
+(merge commit, squash, rebase) keeps the same `frontend/` content, so prod finds the exact
+image staging tested. The pipeline files only call `ci-build.sh`, `ci-deploy.sh` and
+`rollback.sh`, so a GitLab pipeline can reuse them unchanged.
+
+Needs: repo secret `DEPLOYER_KUBECONFIG` (contents of `.secrets/deployer.kubeconfig`) and a
+public `kanso-web` package in GHCR, so the cluster can pull without a token.
+
 ## Headlamp login token
 
 ```bash

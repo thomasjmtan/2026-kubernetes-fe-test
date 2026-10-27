@@ -1,0 +1,45 @@
+# Push to the staging branch: build the image once and deploy it to staging.
+name: Staging
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: deploy-staging
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, k3s-local]
+    environment:
+      name: staging
+      url: http://staging.kanso.localhost:8081
+    defaults:
+      run:
+        # Git Bash explicitly: plain `bash` on this PC is WSL
+        shell: '"C:\Program Files\Git\bin\bash.exe" --noprofile --norc -eo pipefail {0}'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build and push image (skipped if this frontend was built before)
+        run: k3s/ci-build.sh
+
+      - name: Deploy to staging
+        env:
+          DEPLOYER_KUBECONFIG: ${{ secrets.DEPLOYER_KUBECONFIG }}
+        run: |
+          export KANSO_KUBECONFIG="${RUNNER_TEMP}/deployer.kubeconfig"
+          printf '%s' "${DEPLOYER_KUBECONFIG}" > "${KANSO_KUBECONFIG}"
+          k3s/ci-deploy.sh staging
+
+      - name: Clean up
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/deployer.kubeconfig"; docker logout ghcr.io

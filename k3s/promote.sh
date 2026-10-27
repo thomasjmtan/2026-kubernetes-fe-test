@@ -16,6 +16,4 @@ if [ "$(current_image "${PROD}")" = "${IMAGE}" ]; then
 fi
 
 echo "==> Promoting ${IMAGE} from staging to prod"
-kc -n "${PROD}" set image deploy/kanso-web web="${IMAGE}"
-kc -n "${PROD}" annotate deploy/kanso-web kubernetes.io/change-cause="promote ${IMAGE} from staging" --overwrite
-kc -n "${PROD}" rollout status deploy/kanso-web --timeout=120s
+roll "${PROD}" "${IMAGE}" "promote ${IMAGE} from staging"

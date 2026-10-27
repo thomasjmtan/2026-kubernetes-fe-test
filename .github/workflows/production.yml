@@ -1,0 +1,38 @@
+# Push (merge) to main: promote the image staging tested to production. No rebuild.
+name: Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+
+jobs:
+  promote:
+    runs-on: [self-hosted, k3s-local]
+    environment:
+      name: production
+      url: http://kanso.localhost:8081
+    defaults:
+      run:
+        # Git Bash explicitly: plain `bash` on this PC is WSL
+        shell: '"C:\Program Files\Git\bin\bash.exe" --noprofile --norc -eo pipefail {0}'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Promote to production
+        env:
+          DEPLOYER_KUBECONFIG: ${{ secrets.DEPLOYER_KUBECONFIG }}
+        run: |
+          export KANSO_KUBECONFIG="${RUNNER_TEMP}/deployer.kubeconfig"
+          printf '%s' "${DEPLOYER_KUBECONFIG}" > "${KANSO_KUBECONFIG}"
+          k3s/ci-deploy.sh prod
+
+      - name: Clean up
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/deployer.kubeconfig"

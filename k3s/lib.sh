@@ -36,3 +36,18 @@ current_image() {
   kc -n "$1" get deploy/kanso-web \
     -o jsonpath='{.spec.template.spec.containers[?(@.name=="web")].image}'
 }
+
+# roll <ns> <image> <change-cause>: set the image and wait until it is healthy
+roll() {
+  kc -n "$1" set image deploy/kanso-web web="$2"
+  kc -n "$1" annotate deploy/kanso-web kubernetes.io/change-cause="$3" --overwrite
+  kc -n "$1" rollout status deploy/kanso-web --timeout=120s
+}
+
+# Registry images (used by the CI scripts). The tag is git's hash of the committed
+# frontend/ folder, so the same content always maps to the same image, whichever
+# commit or merge style it arrives in.
+REGISTRY="${REGISTRY:-ghcr.io/thomasjmtan}"
+registry_image() {
+  echo "${REGISTRY}/kanso-web:$(git -C "${HERE}/.." rev-parse --short=12 HEAD:frontend)"
+}

@@ -25,6 +25,12 @@ The page footer shows which version is running.
 - **`.localhost` needs no setup.** Browsers send any `*.localhost` name to your own PC, so
   you don't need to edit your hosts file or set up DNS. On a real server, swap in real domains.
 
+## Pipeline
+
+Push to the `staging` branch → GitHub Actions builds the image and deploys it to staging.
+Merge `staging` into `main` → the same image is promoted to production, with no rebuild.
+Jobs run on a self-hosted runner on this PC. Details in [k3s/README.md](k3s/README.md).
+
 ## More
 
 - [k3s/README.md](k3s/README.md): deploy, promote, rollback and clean-up commands.
