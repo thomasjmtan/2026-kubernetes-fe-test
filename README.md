@@ -14,7 +14,8 @@ Start the cluster first: `cd k3s && docker compose up -d && ./setup.sh`
 | Headlamp (cluster GUI) | http://headlamp.localhost:8081 | Log in with a token from `docker exec k3s kubectl -n headlamp create token headlamp-admin`. Full admin rights, so local use only. |
 | Kubernetes API | https://127.0.0.1:6443 | For `kubectl`, not a browser. Credentials are in `k3s/kubeconfig/kubeconfig.yaml`. |
 
-The page footer shows which version is running.
+The page footer shows which version is running. The cube dashboard is at `/dashboard` on
+either host, for example http://staging.kanso.localhost:8081/dashboard.
 
 ## Why these addresses
 
